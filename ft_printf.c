@@ -109,12 +109,29 @@ void	ft_spec_type(char **format, t_struct *s)
 		(*format)++;
 }
 
-int		ft_for_c(va_list list, t_struct *s)
+int		ft_for_c(t_struct *s, int c)
 {
 	int i;
 
-	i = 0;
-	
+	i = 1;
+	if (s->flag_zero && !s->flag_minus)
+	{
+		while (i++ < s->width)
+			write(1, "0", 1);
+		ft_putchar(c);
+	}
+	else if (s->flag_minus)
+	{
+		ft_putchar(c);
+		while (i++ < s->width)
+			write(1, " ", 1);
+	}
+	else
+	{
+		while (i++ < s->width)
+			write(1, " ", 1);
+		ft_putchar(c);
+	}
 	return (i);
 }
 
@@ -183,7 +200,7 @@ int		ft_printf(const char *format, ...)
 int		main(void)
 {
 //	setlocale(LC_ALL, "");
-
+	ft_printf("%c\n", 21368);
 	//wint_t t = "ø";
 	//printf("%lc", t);
 	//printf("orig return value = %d\n", printf("%s\n", 123));
