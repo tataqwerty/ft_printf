@@ -6,14 +6,16 @@
 /*   By: tkiselev <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/04/14 16:35:40 by tkiselev          #+#    #+#             */
-/*   Updated: 2018/04/22 16:41:35 by tkiselev         ###   ########.fr       */
+/*   Updated: 2018/04/22 20:12:28 by tkiselev         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_printf.h"
 
+#include <wchar.h>
+
 #include <stdio.h>
-/*
+
 t_struct	*create_struct(void)
 {
 	t_struct *s;
@@ -107,7 +109,47 @@ void	ft_spec_type(char **format, t_struct *s)
 		(*format)++;
 }
 
-int		ft_for_c(va_list list, t_struct *s)
+int		ft_i_check(wint_t c)
+{
+	if (c < 0 || c > 1114111)
+		return (-1);
+	if (c > 255 && c < 2048)
+		return (1);
+	else if (c >= 2048 && c < 65536)
+		return (2);
+	else if (c >= 65536 && c < 1114112)
+		return (3);
+	return (0);
+}
+
+int		ft_for_lc(wint_t c, t_struct *s)
+{
+	int i;
+
+	if ((i = ft_i_check(c)) == -1 || (i != 0 && MB_CUR_MAX != 4))
+		return (-1);
+	if (s->flag_zero && !s->flag_minus)
+	{
+		while (++i < s->width)
+			write(1, "0", 1);
+		ft_putchar(c);
+	}
+	else if (s->flag_minus)
+	{
+		ft_putchar(c);
+		while (++i < s->width)
+			write(1, " ", 1);
+	}
+	else
+	{
+		while (++i < s->width)
+			write(1, " ", 1);
+		ft_putchar(c);
+	}
+	return (i);
+}
+
+int		ft_for_c(unsigned char c, t_struct *s)
 {
 	int i;
 
@@ -116,11 +158,11 @@ int		ft_for_c(va_list list, t_struct *s)
 	{
 		while (++i < s->width)
 			write(1, "0", 1);
-		ft_putchar(va_arg(list, int));
+		write(1, &c, 1);
 	}
 	else if (s->flag_minus)
 	{
-		ft_putchar(va_arg(list, int));
+		write(1, &c, 1);
 		while (++i < s->width)
 			write(1, " ", 1);
 	}
@@ -128,24 +170,31 @@ int		ft_for_c(va_list list, t_struct *s)
 	{
 		while (++i < s->width)
 			write(1, " ", 1);
-		ft_putchar(va_arg(list, int));
+		write(1, &c, 1);
 	}
 	return (i);
 }
 
-int		ft_for_s(va_list list, t_struct *s)
+int		ft_for_all_s(va_list list, t_struct *s)
 {
 	ft_putchar('A');
 	return (0);
 }
 
+int		ft_for_all_c(va_list list, t_struct *s)
+{
+	if (ft_strcmp(s->size, "l") == 0)
+		return (ft_for_lc((wchar_t)va_arg(list, wint_t), s));
+	return (ft_for_c((unsigned char)va_arg(list, int), s));
+}
+
 int		ft_magic(va_list list, t_struct *s)
 {
-
-	static int	(*func_arr[2])(va_list, t_struct *) = {ft_for_c, ft_for_s};
-
-	func_arr[](list, s);
-	static t_printf arr[2] = {{'c', ft_for_c}, {'s', ft_for_s}};
+	int				i;
+	static t_printf	arr[] = {
+		{'c', ft_for_all_c},
+		{'s', ft_for_all_s}
+		};
 
 	i = 0;
 	while (i < 2)
@@ -157,9 +206,10 @@ int		ft_magic(va_list list, t_struct *s)
 	return (0);
 }
 
-int		ft_parse_spec(va_list list, char **format)
+int		ft_parse_spec(va_list list, char **format, int *i)
 {
-	t_struct *s;
+	t_struct	*s;
+	int			tmp;
 
 	if (!format || !*format)
 		return (0);
@@ -170,7 +220,9 @@ int		ft_parse_spec(va_list list, char **format)
 	ft_spec_size(format, s);
 	ft_spec_type(format, s);
 	if (s->type != '\0')
-		return (ft_magic(list, s));
+		if ((tmp = ft_magic(list, s)) == -1)
+			return (-1);
+	*i += tmp;
 	return (0);
 }
 
@@ -196,7 +248,8 @@ int		ft_printf(const char *format, ...)
 			}
 			else
 			{
-				i += ft_parse_spec(list, &s);
+				if (ft_parse_spec(list, &s, &i) == -1)
+					return (-1);
 			}
 		}
 		else
@@ -208,14 +261,21 @@ int		ft_printf(const char *format, ...)
 	}
 	return (i);
 }
-*/
+
+#include <locale.h>
 
 int		main(void)
 {
-	enum types type;
+	//setlocale(LC_ALL, "");
+	printf("%d\n", printf("%lc\n", 65));
+	printf("%d\n", ft_printf("%lc\n", 65));
 
-	type = "ll";
-	printf("%d\n", type);
+	//ft_printf("%s", 87777);
+	//printf("%C", L'狼');
+	//ft_printf("%4lc", 87777);
+	//printf("orig = %d\n", printf("%lc", 256));
+	//printf("mine = %d\n", ft_printf("%lc", 256));
+	//printf("%d", printf("%c\n", -1231));
 	//ft_putchar(21368);
 	//printf("mine = %d\n", ft_printf("%c\n", 65));
 	//printf("orig = %d\n", printf("%c\n", 65));
