@@ -6,13 +6,14 @@
 /*   By: tkiselev <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/04/18 13:14:36 by tkiselev          #+#    #+#             */
-/*   Updated: 2018/04/21 20:26:09 by tkiselev         ###   ########.fr       */
+/*   Updated: 2018/04/22 16:52:01 by tkiselev         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef FT_PRINTF_H
 # define FT_PRINTF_H
 # include "libft.h"
+# include <stdarg.h>
 
 typedef struct	s_struct
 {
@@ -27,9 +28,9 @@ typedef struct	s_struct
 	int		flag_space;
 }				t_struct;
 
-union Data
+typedef struct
 {
-	int		c;
-	char	*s;
-};
+	char		type;
+	int			(*function)(va_list list, t_struct *s);
+}				t_printf;
 #endif

@@ -6,16 +6,14 @@
 /*   By: tkiselev <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/04/14 16:35:40 by tkiselev          #+#    #+#             */
-/*   Updated: 2018/04/21 20:39:25 by tkiselev         ###   ########.fr       */
+/*   Updated: 2018/04/22 16:41:35 by tkiselev         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_printf.h"
-#include <stdarg.h>
+
 #include <stdio.h>
-
-#include <wchar.h>
-
+/*
 t_struct	*create_struct(void)
 {
 	t_struct *s;
@@ -105,44 +103,61 @@ void	ft_spec_type(char **format, t_struct *s)
 	**format == 'u' || **format == 'U' || **format == 'x' || **format == 'X' ||
 	**format == 'c' || **format == 'C')
 		s->type = **format;
-	if (**format)
+	if (s->type != '\0')
 		(*format)++;
 }
 
-int		ft_for_c(t_struct *s, int c)
+int		ft_for_c(va_list list, t_struct *s)
 {
 	int i;
 
-	i = 1;
+	i = 0;
 	if (s->flag_zero && !s->flag_minus)
 	{
-		while (i++ < s->width)
+		while (++i < s->width)
 			write(1, "0", 1);
-		ft_putchar(c);
+		ft_putchar(va_arg(list, int));
 	}
 	else if (s->flag_minus)
 	{
-		ft_putchar(c);
-		while (i++ < s->width)
+		ft_putchar(va_arg(list, int));
+		while (++i < s->width)
 			write(1, " ", 1);
 	}
 	else
 	{
-		while (i++ < s->width)
+		while (++i < s->width)
 			write(1, " ", 1);
-		ft_putchar(c);
+		ft_putchar(va_arg(list, int));
 	}
 	return (i);
 }
 
-int		ft_magic(va_list list, union Data data, t_struct *s)
+int		ft_for_s(va_list list, t_struct *s)
 {
-	if (s->type == 'c')
-		return (ft_for_c(s, (data.c = va_arg(list, int))));
+	ft_putchar('A');
 	return (0);
 }
 
-int		ft_parse_spec(va_list list,union Data data, char **format)
+int		ft_magic(va_list list, t_struct *s)
+{
+
+	static int	(*func_arr[2])(va_list, t_struct *) = {ft_for_c, ft_for_s};
+
+	func_arr[](list, s);
+	static t_printf arr[2] = {{'c', ft_for_c}, {'s', ft_for_s}};
+
+	i = 0;
+	while (i < 2)
+	{
+		if (s->type == arr[i].type)
+			return (arr[i].function(list, s));
+		i++;
+	}
+	return (0);
+}
+
+int		ft_parse_spec(va_list list, char **format)
 {
 	t_struct *s;
 
@@ -155,13 +170,12 @@ int		ft_parse_spec(va_list list,union Data data, char **format)
 	ft_spec_size(format, s);
 	ft_spec_type(format, s);
 	if (s->type != '\0')
-		return (ft_magic(list, data, s));
+		return (ft_magic(list, s));
 	return (0);
 }
 
 int		ft_printf(const char *format, ...)
 {
-	union Data data;
 	va_list list;
 	int		i;
 	char	*s;
@@ -182,7 +196,7 @@ int		ft_printf(const char *format, ...)
 			}
 			else
 			{
-				i += ft_parse_spec(list, data, &s);
+				i += ft_parse_spec(list, &s);
 			}
 		}
 		else
@@ -194,13 +208,17 @@ int		ft_printf(const char *format, ...)
 	}
 	return (i);
 }
-
-#include <locale.h>
+*/
 
 int		main(void)
 {
-//	setlocale(LC_ALL, "");
-	ft_printf("%c\n", 21368);
+	enum types type;
+
+	type = "ll";
+	printf("%d\n", type);
+	//ft_putchar(21368);
+	//printf("mine = %d\n", ft_printf("%c\n", 65));
+	//printf("orig = %d\n", printf("%c\n", 65));
 	//wint_t t = "ø";
 	//printf("%lc", t);
 	//printf("orig return value = %d\n", printf("%s\n", 123));

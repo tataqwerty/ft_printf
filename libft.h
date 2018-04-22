@@ -6,7 +6,7 @@
 /*   By: tkiselev <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/03/21 16:40:11 by tkiselev          #+#    #+#             */
-/*   Updated: 2018/04/14 12:39:17 by tkiselev         ###   ########.fr       */
+/*   Updated: 2018/04/22 11:23:10 by tkiselev         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,6 @@
 # include <stdlib.h>
 # include <unistd.h>
 # include <string.h>
-# include "get_next_line.h"
 
 void				*ft_memset(void *b, int c, size_t len);
 void				ft_bzero(void *s, size_t n);
@@ -62,7 +61,7 @@ char				*ft_strjoin(char const *s1, char const *s2);
 char				*ft_strtrim(char const *s);
 char				**ft_strsplit(char const *s, char c);
 char				*ft_itoa(int n);
-void				ft_putchar(char c);
+void				ft_putchar(int c);
 void				ft_putstr(char const *s);
 void				ft_putnbr(int n);
 void				ft_putendl(char const *s);
@@ -70,7 +69,6 @@ void				ft_putchar_fd(char c, int fd);
 void				ft_putstr_fd(char const *s, int fd);
 void				ft_putendl_fd(char const *s, int fd);
 void				ft_putnbr_fd(int n, int fd);
-int					get_next_line(const int fd, char **line);
 
 typedef struct		s_list
 {
@@ -79,7 +77,8 @@ typedef struct		s_list
 	struct s_list	*next;
 }					t_list;
 
-void				ft_list_remove_if(t_list **begin_list, void *data_ref, int (*cmp)());
+void				ft_list_remove_if(t_list **begin_list,
+					void *data_ref, int (*cmp)());
 t_list				*ft_lstnew(void const *content, size_t content_size);
 void				ft_lstdelone(t_list **alst, void (*del)(void *, size_t));
 void				ft_lstdel(t_list **alst, void (*del)(void *, size_t));
@@ -101,4 +100,15 @@ void				ft_btree_apply_infix(t_btree *root, void (*f)(void *));
 void				ft_btree_apply_infix_reverse(t_btree *root,
 					void (*f)(void *));
 void				ft_btree_apply_postfix(t_btree *root, void (*f)(void *));
+
+# define BUFF_SIZE 1
+
+typedef struct		s_gnl
+{
+	char			*buffer;
+	int				tmp_fd;
+	struct s_gnl	*next;
+}					t_gnl;
+
+int					get_next_line(const int fd, char **line);
 #endif
