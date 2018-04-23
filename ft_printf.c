@@ -6,7 +6,7 @@
 /*   By: tkiselev <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/04/14 16:35:40 by tkiselev          #+#    #+#             */
-/*   Updated: 2018/04/22 20:12:28 by tkiselev         ###   ########.fr       */
+/*   Updated: 2018/04/23 21:20:20 by tkiselev         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,122 +34,16 @@ t_struct	*create_struct(void)
 	return (s);
 }
 
-void	ft_spec_flags(char **format, t_struct *s)
+void	ft_spec(va_list list, char **format, t_struct *s)
 {
-	while (**format)
-	{
-		if (**format == '0')
-			s->flag_zero = 1;
-		else if (**format == '#')
-			s->flag_reshetka = 1;
-		else if (**format == '-')
-			s->flag_minus = 1;
-		else if (**format == '+')
-			s->flag_plus = 1;
-		else if (**format == ' ')
-			s->flag_space = 1;
-		else
-			break ;
-		(*format)++;
-	}
+	ft_spec_flags(format, s);
+	ft_spec_width(format, s, list);
+	ft_spec_precision(format, s, list);
+	ft_spec_size(format, s);
+	ft_spec_type(format, s);
 }
 
-void	ft_spec_width(char **format, t_struct *s, va_list list)
-{
-	if (**format == '*')
-	{
-		(*format)++;
-		s->width = va_arg(list, int);
-	}
-	else
-	{
-		while (**format >= '0' && **format <= '9')
-			s->width = s->width * 10 + *(*format)++ - 48;
-	}
-}
-
-void	ft_spec_precision(char **format, t_struct *s, va_list list)
-{
-	if (**format == '.')
-	{
-		(*format)++;
-		if (**format == '*')
-		{
-			(*format)++;
-			s->precision = va_arg(list, int);
-		}
-		else
-		{
-			s->precision = 0;
-			while (**format >= '0' && **format <= '9')
-				s->precision = s->precision * 10 + *(*format)++ - 48 ;
-		}
-	}
-}
-
-void	ft_spec_size(char **format, t_struct *s)
-{
-	if ((**format == 'h' && *(*format + 1) == 'h') || (**format == 'l' && *(*format + 1) == 'l'))
-	{
-		s->size[0] = *(*format)++;
-		s->size[1] = *(*format)++;
-	}
-	else if (**format == 'h' || **format == 'l' || **format == 'z' || **format == 'j')
-		s->size[0] = *(*format)++;
-}
-
-void	ft_spec_type(char **format, t_struct *s)
-{
-	if (**format == 's' || **format == 'S' || **format == 'p' || **format == 'd'
-	|| **format == 'D' || **format == 'i' || **format == 'o'|| **format == 'O' ||
-	**format == 'u' || **format == 'U' || **format == 'x' || **format == 'X' ||
-	**format == 'c' || **format == 'C')
-		s->type = **format;
-	if (s->type != '\0')
-		(*format)++;
-}
-
-int		ft_i_check(wint_t c)
-{
-	if (c < 0 || c > 1114111)
-		return (-1);
-	if (c > 255 && c < 2048)
-		return (1);
-	else if (c >= 2048 && c < 65536)
-		return (2);
-	else if (c >= 65536 && c < 1114112)
-		return (3);
-	return (0);
-}
-
-int		ft_for_lc(wint_t c, t_struct *s)
-{
-	int i;
-
-	if ((i = ft_i_check(c)) == -1 || (i != 0 && MB_CUR_MAX != 4))
-		return (-1);
-	if (s->flag_zero && !s->flag_minus)
-	{
-		while (++i < s->width)
-			write(1, "0", 1);
-		ft_putchar(c);
-	}
-	else if (s->flag_minus)
-	{
-		ft_putchar(c);
-		while (++i < s->width)
-			write(1, " ", 1);
-	}
-	else
-	{
-		while (++i < s->width)
-			write(1, " ", 1);
-		ft_putchar(c);
-	}
-	return (i);
-}
-
-int		ft_for_c(unsigned char c, t_struct *s)
+int		ft_for_c(int c, t_struct *s)
 {
 	int i;
 
@@ -161,7 +55,7 @@ int		ft_for_c(unsigned char c, t_struct *s)
 		write(1, &c, 1);
 	}
 	else if (s->flag_minus)
-	{
+	{	
 		write(1, &c, 1);
 		while (++i < s->width)
 			write(1, " ", 1);
@@ -175,29 +69,123 @@ int		ft_for_c(unsigned char c, t_struct *s)
 	return (i);
 }
 
-int		ft_for_all_s(va_list list, t_struct *s)
+int		ft_for_lc(wchar_t c, t_struct *s)
 {
-	ft_putchar('A');
-	return (0);
+	int i;
+
+	if (MB_CUR_MAX == 1 && c >= 0 && c <= 255)
+		return (ft_for_c(c, s));
+	else if (MB_CUR_MAX != 4 || c < 0 || (i = ft_bytes(c) - 1) == -1)
+		return (-1);
+	else if (s->flag_zero && !s->flag_minus)
+	{
+		while (++i < s->width)
+			write(1, "0", 1);
+		ft_putchar(c);
+	}
+	else if (s->flag_minus)
+	{
+		ft_putchar(c);
+		while (++i < s->width)
+			write(1, " ", 1);
+	}
+	else
+	{
+		while (++i < s->width)
+			write(1, " ", 1);
+		ft_putchar(c);
+	}
+	return (i);
 }
 
 int		ft_for_all_c(va_list list, t_struct *s)
 {
-	if (ft_strcmp(s->size, "l") == 0)
-		return (ft_for_lc((wchar_t)va_arg(list, wint_t), s));
-	return (ft_for_c((unsigned char)va_arg(list, int), s));
+	if ((ft_strcmp(s->size, "l") == 0 && s->type == 'c') ||
+	(s->type == 'C' && s->size[0] == '\0'))
+		return (ft_for_lc(va_arg(list, wchar_t), s));
+	return (ft_for_c(va_arg(list, int), s));
 }
+
+
+
+
+
+
+
+
+
+
+
+
+int		ft_count_bytes(wchar_t *s)
+{
+	int res;
+	int i;
+
+	i = 0;
+	res = 0;
+	while (s[i] != '\0')
+	{
+		res += ft_bytes((int)s[i]);
+		i++;
+	}
+	return (res);
+}
+
+int		ft_for_ls(wchar_t *str, t_struct *s)
+{
+	int	i;
+	int	byte;
+	int bytes;
+
+	i = 0;
+	bytes = ft_count_bytes(str);
+	if (s->precision < bytes && s->precision != -1)
+		bytes = s->precision;
+	if (s->width > bytes)
+	{
+		if (s->flag_minus)
+		{
+			while (bytes > 0)
+			{
+				byte = ft_bytes(str[i]);
+				if (byte > bytes)
+					break ;
+				ft_putchar(str[i++]);
+				bytes -= byte;
+			}
+			while (i++ < s->width)
+				write(1, " ", 1);
+		}
+	}
+	return (0);
+}
+
+
+
+
+
+int		ft_for_all_s(va_list list, t_struct *s)
+{
+	if ((ft_strcmp(s->size, "l") == 0 && s->type == 's') ||
+	(s->type == 'S' && s->size[0] == '\0'))
+		return (ft_for_ls(va_arg(list, wchar_t*), s));
+//	return (ft_for_s(va_arg(list, char*), s));
+}
+
+
 
 int		ft_magic(va_list list, t_struct *s)
 {
-	int				i;
-	static t_printf	arr[] = {
+	int i;
+	static t_printf arr[] = {
 		{'c', ft_for_all_c},
+		{'C', ft_for_all_c},
 		{'s', ft_for_all_s}
 		};
 
 	i = 0;
-	while (i < 2)
+	while (i < 3)
 	{
 		if (s->type == arr[i].type)
 			return (arr[i].function(list, s));
@@ -211,26 +199,40 @@ int		ft_parse_spec(va_list list, char **format, int *i)
 	t_struct	*s;
 	int			tmp;
 
+	tmp = 0;
 	if (!format || !*format)
 		return (0);
-	s = create_struct();
-	ft_spec_flags(format, s);
-	ft_spec_width(format, s, list);
-	ft_spec_precision(format, s, list);
-	ft_spec_size(format, s);
-	ft_spec_type(format, s);
+	if (!(s = create_struct()))
+		return (-1);
+	ft_spec(list, format, s);
 	if (s->type != '\0')
+	{
 		if ((tmp = ft_magic(list, s)) == -1)
 			return (-1);
+	}
 	*i += tmp;
-	return (0);
+	return (tmp);
+}
+
+int		ft_obrabotka(va_list list, char **format, int *i)
+{
+	(*format)++;
+	if (**format == '%')
+	{
+		write(1, &(*format), 1);
+		(*format)++;
+		*i += *i + 1;
+		return (0);
+	}
+	else
+		return (ft_parse_spec(list, format, i));
 }
 
 int		ft_printf(const char *format, ...)
 {
-	va_list list;
-	int		i;
-	char	*s;
+	va_list			list;
+	int				i;
+	char			*s;
 
 	i = 0;
 	s = (char*)format;
@@ -239,18 +241,8 @@ int		ft_printf(const char *format, ...)
 	{
 		if (*s == '%')
 		{
-			s++;
-			if (*s == '%')
-			{
-				ft_putchar(*s);
-				i++;
-				s++;
-			}
-			else
-			{
-				if (ft_parse_spec(list, &s, &i) == -1)
-					return (-1);
-			}
+			if ((ft_obrabotka(list, &(s), &i) == -1))
+				return (-1);
 		}
 		else
 		{
@@ -259,6 +251,7 @@ int		ft_printf(const char *format, ...)
 			i++;
 		}
 	}
+	va_end(list);
 	return (i);
 }
 
@@ -266,22 +259,11 @@ int		ft_printf(const char *format, ...)
 
 int		main(void)
 {
-	//setlocale(LC_ALL, "");
-	printf("%d\n", printf("%lc\n", 65));
-	printf("%d\n", ft_printf("%lc\n", 65));
+	setlocale(LC_ALL, "");
+	ft_printf("%-10ls", L"⑂⑃");
 
-	//ft_printf("%s", 87777);
-	//printf("%C", L'狼');
-	//ft_printf("%4lc", 87777);
-	//printf("orig = %d\n", printf("%lc", 256));
-	//printf("mine = %d\n", ft_printf("%lc", 256));
-	//printf("%d", printf("%c\n", -1231));
-	//ft_putchar(21368);
-	//printf("mine = %d\n", ft_printf("%c\n", 65));
-	//printf("orig = %d\n", printf("%c\n", 65));
-	//wint_t t = "ø";
-	//printf("%lc", t);
-	//printf("orig return value = %d\n", printf("%s\n", 123));
-	//printf("mine return value = %d\n", ft_printf("%s\n", 123));
+	//printf("%d\n", printf("%lc\n", -1));
+	//printf("%d\n", printf("%S", L"Привкет"));
+	//ft_putchar(127);
 	return (0);
 }

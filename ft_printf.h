@@ -6,7 +6,7 @@
 /*   By: tkiselev <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/04/18 13:14:36 by tkiselev          #+#    #+#             */
-/*   Updated: 2018/04/22 16:52:01 by tkiselev         ###   ########.fr       */
+/*   Updated: 2018/04/23 11:23:30 by tkiselev         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,4 +33,10 @@ typedef struct
 	char		type;
 	int			(*function)(va_list list, t_struct *s);
 }				t_printf;
+
+void	ft_spec_flags(char **format, t_struct *s);
+void	ft_spec_width(char **format, t_struct *s, va_list list);
+void	ft_spec_precision(char **format, t_struct *s, va_list list);
+void	ft_spec_size(char **format, t_struct *s);
+void	ft_spec_type(char **format, t_struct *s);
 #endif

@@ -1,5 +1,5 @@
 NAME=ft_printf
-SRCS=ft_printf.c
+SRCS=ft_printf.c ft_spec.c
 OBJ=$(SRCS:.c=.o)
 
 all: $(NAME)

@@ -6,7 +6,7 @@
 /*   By: tkiselev <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/03/21 16:40:11 by tkiselev          #+#    #+#             */
-/*   Updated: 2018/04/22 18:51:39 by tkiselev         ###   ########.fr       */
+/*   Updated: 2018/04/23 18:41:03 by tkiselev         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,6 +69,8 @@ void				ft_putchar_fd(char c, int fd);
 void				ft_putstr_fd(char const *s, int fd);
 void				ft_putendl_fd(char const *s, int fd);
 void				ft_putnbr_fd(int n, int fd);
+unsigned char		*ft_remalloc(unsigned char *ptr, int size);
+int					ft_bytes(int c);
 
 typedef struct		s_list
 {
