@@ -313,7 +313,7 @@ int		ft_dlen(int value)
 {
 	int i;
 
-	i = (value < 0) ? 1 : 0;
+	i = 0;
 	while (value)
 	{
 		i++;
@@ -340,13 +340,27 @@ int		ft_create_str(int value, int strlen, t_struct *s, char **str)
 
 int		ft_for_d(int value, t_struct *s)
 {
-	int		i;
+	int	i;
+	int 	dlen;
 
 	i = 0;
+	dlen = ft_dlen(value);
 	if (s->flag_minus == 1)
 	{
-		if (s->flag_plus)
-			write(1, "+", 1);
+		if (s->flag_plus || value < 0)
+		{
+			i++;
+			write(1, ((value < 0) ? "-" : "+"), 1);
+		}
+		while (s->precision-- > dlen && ++i)
+			write(1, "0", 1);
+		if (value == -2147483648)
+			ft_putstr("2147483648");
+		else
+			ft_putnbr((value < 0) ? -value : value);
+		i += dlen - 1;
+		while (++i < s->width)
+			write(1, " ", 1);
 	}
 	return (i);
 }
@@ -357,9 +371,6 @@ int		ft_for_all_d(va_list list, t_struct *s)
 		return (ft_for_d(va_arg(list, int), s));
 	return (0);
 }
-
-
-
 
 int		ft_magic(va_list list, t_struct *s)
 {
@@ -450,6 +461,9 @@ int		ft_printf(const char *format, ...)
 
 int		main(void)
 {
+	printf("mine = %d\n", ft_printf("%-6.2d", 123));
+	printf("orig = %d\n", printf("%-6.2d", 123));
+	
 	//setlocale(LC_ALL, "");
 	//ft_printf("%S\n", L"hello");
 
