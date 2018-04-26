@@ -6,13 +6,14 @@
 /*   By: tkiselev <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/04/14 16:35:40 by tkiselev          #+#    #+#             */
-/*   Updated: 2018/04/23 21:20:20 by tkiselev         ###   ########.fr       */
+/*   Updated: 2018/04/26 21:31:58 by tkiselev         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_printf.h"
 
 #include <wchar.h>
+#include <stdint.h>
 
 #include <stdio.h>
 
@@ -117,61 +118,246 @@ int		ft_for_all_c(va_list list, t_struct *s)
 
 
 
-int		ft_count_bytes(wchar_t *s)
+
+
+int		ft_count_bytes(wchar_t *str)
 {
 	int res;
 	int i;
 
 	i = 0;
 	res = 0;
-	while (s[i] != '\0')
+	while (str[i])
+		res += ft_bytes(str[i++]);
+	return (res);
+}
+
+int		ft_for_write(wchar_t *str, int bytes)
+{
+	int i;
+	int res;
+	int byte;
+
+	res = 0;
+	i = 0;
+	while (bytes > 0)
 	{
-		res += ft_bytes((int)s[i]);
-		i++;
+		byte = ft_bytes(str[i]);
+		if (bytes < byte)
+			break ;
+		ft_putchar(str[i++]);
+		bytes -= byte;
+		res += byte;
 	}
 	return (res);
 }
 
-int		ft_for_ls(wchar_t *str, t_struct *s)
+int		ft_for_skip(wchar_t *str, int width, int bytes)
 {
-	int	i;
-	int	byte;
-	int bytes;
+	int i;
+	int byte;
+	int res;
+
+	res = 0;
+	i = 0;
+	while (bytes > 0)
+	{
+		byte = ft_bytes(str[i++]);
+		if (bytes < byte)
+			break ;
+		bytes -= byte;
+		res += byte;
+	}
+	i = res - 1;
+	while (++i < width)
+		write(1, " ", 1);
+	return (i - res);
+}
+
+int		ft_has_unicode(wchar_t *str, int bytes)
+{
+	int i;
+	int byte;
 
 	i = 0;
-	bytes = ft_count_bytes(str);
-	if (s->precision < bytes && s->precision != -1)
-		bytes = s->precision;
-	if (s->width > bytes)
+	while (bytes > 0)
 	{
-		if (s->flag_minus)
-		{
-			while (bytes > 0)
-			{
-				byte = ft_bytes(str[i]);
-				if (byte > bytes)
-					break ;
-				ft_putchar(str[i++]);
-				bytes -= byte;
-			}
-			while (i++ < s->width)
-				write(1, " ", 1);
-		}
+		byte = ft_bytes(str[i]);
+		if (byte != 1)
+			return (1);
+		bytes -= byte;
+		i++;
 	}
 	return (0);
 }
 
+int		ft_for_ls(wchar_t *str, t_struct *s)
+{
+	int i;
+	int bytes;
+	int bytes2;
 
+	i = 0;
+	bytes2 = 0;
+	bytes = ft_count_bytes(str);
+	if (ft_has_unicode(str, bytes) == 1 && MB_CUR_MAX != 4)
+		return (-1);
+	if (bytes > s->precision && s->precision != -1)
+		bytes = s->precision;
+	if (s->flag_minus)
+	{
+		bytes2 = ft_for_write(str, bytes) - 1;
+		while (++bytes2 < s->width)
+			write(1, " ", 1);
+	}
+	else
+	{
+		bytes2 = ft_for_skip(str, s->width, bytes);
+		bytes2 += ft_for_write(str, bytes);
+	}
+	return (bytes2);
+}
 
+int		ft_for_s(char *str, t_struct *s)
+{
+	int		j;
+	int		i;
+	int 	bytes;
 
+	i = 0;
+	bytes = ft_strlen(str);
+	if (bytes > s->precision && s->precision != -1)
+		bytes = s->precision;
+	if (s->flag_minus)
+	{
+		while (i < bytes)
+			write(1, &str[i++], 1);
+		while (bytes++ < s->width)
+			write(1, " ", 1);
+	}
+	else
+	{
+		j = bytes;
+		while (bytes++ < s->width)
+			write(1, " ", 1);
+		while (i < j)
+			write(1, &str[i++], 1);
+	}
+	return (bytes - 1);
+}
 
 int		ft_for_all_s(va_list list, t_struct *s)
 {
-	if ((ft_strcmp(s->size, "l") == 0 && s->type == 's') ||
+	wchar_t	*str1;
+	char	*str2;
+
+	if ((s->type == 's' && ft_strcmp(s->size, "l") == 0) ||
 	(s->type == 'S' && s->size[0] == '\0'))
-		return (ft_for_ls(va_arg(list, wchar_t*), s));
-//	return (ft_for_s(va_arg(list, char*), s));
+	{
+		str1 = va_arg(list, wchar_t*);
+		if (str1 == NULL)
+		{
+			ft_putstr("(null)");
+			return (6);
+		}
+		return (ft_for_ls(str1, s));
+	}
+	else if (s->type == 's' && s->size[0] == '\0')
+	{
+		str2 = va_arg(list, char*);
+		if (str2 == NULL)
+		{
+			ft_putstr("(null)");
+			return (6);
+		}
+		return (ft_for_s(str2, s));
+	}
+	return (-1);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+int		ft_dlen(int value)
+{
+	int i;
+
+	i = (value < 0) ? 1 : 0;
+	while (value)
+	{
+		i++;
+		value /= 10;
+	}
+	return (i);
+}
+
+int		ft_create_str(int value, int strlen, t_struct *s, char **str)
+{
+	if (s->precision >= strlen)
+		strlen = s->precision;
+	if ((s->flag_space == 1 || s->flag_plus == 1) && value > 0)
+		strlen++;
+	if (s->precision == strlen && value < 0)
+		strlen++;
+	if (s->width > strlen)
+		strlen = s->width;
+	if (!(*str = (char*)malloc(sizeof(char) * (strlen + 1))))
+		return (0);
+	(*str)[strlen] = '\0';
+	return (strlen);
+}
+
+int		ft_for_d(int value, t_struct *s)
+{
+	int		i;
+
+	i = 0;
+	if (s->flag_minus == 1)
+	{
+		if (s->flag_plus)
+			write(1, "+", 1);
+	}
+	return (i);
+}
+
+int		ft_for_all_d(va_list list, t_struct *s)
+{
+	if ((s->type == 'd' || s->type == 'i') && s->size[0] == '\0')
+		return (ft_for_d(va_arg(list, int), s));
+	return (0);
+}
+
 
 
 
@@ -181,11 +367,16 @@ int		ft_magic(va_list list, t_struct *s)
 	static t_printf arr[] = {
 		{'c', ft_for_all_c},
 		{'C', ft_for_all_c},
-		{'s', ft_for_all_s}
+		{'s', ft_for_all_s},
+		{'S', ft_for_all_s},
+		{'d', ft_for_all_d},
+		{'D', ft_for_all_d},
+		{'i', ft_for_all_d},
+		{'I', ft_for_all_d}
 		};
 
 	i = 0;
-	while (i < 3)
+	while (i < 8)
 	{
 		if (s->type == arr[i].type)
 			return (arr[i].function(list, s));
@@ -259,11 +450,9 @@ int		ft_printf(const char *format, ...)
 
 int		main(void)
 {
-	setlocale(LC_ALL, "");
-	ft_printf("%-10ls", L"⑂⑃");
+	//setlocale(LC_ALL, "");
+	//ft_printf("%S\n", L"hello");
 
-	//printf("%d\n", printf("%lc\n", -1));
-	//printf("%d\n", printf("%S", L"Привкет"));
 	//ft_putchar(127);
 	return (0);
 }
