@@ -6,7 +6,7 @@
 /*   By: tkiselev <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/04/14 16:35:40 by tkiselev          #+#    #+#             */
-/*   Updated: 2018/04/26 21:31:58 by tkiselev         ###   ########.fr       */
+/*   Updated: 2018/04/27 21:20:57 by tkiselev         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #include <stdint.h>
 
 #include <stdio.h>
+#include <limits.h>
 
 t_struct	*create_struct(void)
 {
@@ -309,11 +310,13 @@ int		ft_for_all_s(va_list list, t_struct *s)
 
 
 
-int		ft_dlen(int value)
+int		ft_dlen(long int value)
 {
 	int i;
 
 	i = 0;
+	if (value == 0)
+		return (1);
 	while (value)
 	{
 		i++;
@@ -322,54 +325,167 @@ int		ft_dlen(int value)
 	return (i);
 }
 
-int		ft_create_str(int value, int strlen, t_struct *s, char **str)
+int		ft_for_help_d2(long int value, t_struct *s, int dlen)
 {
-	if (s->precision >= strlen)
-		strlen = s->precision;
-	if ((s->flag_space == 1 || s->flag_plus == 1) && value > 0)
-		strlen++;
-	if (s->precision == strlen && value < 0)
-		strlen++;
-	if (s->width > strlen)
-		strlen = s->width;
-	if (!(*str = (char*)malloc(sizeof(char) * (strlen + 1))))
-		return (0);
-	(*str)[strlen] = '\0';
-	return (strlen);
+	int dlen2;
+
+	dlen2 = dlen;
+	if (s->precision > dlen)
+		dlen = s->precision;
+	if (s->flag_plus || value < 0 || s->flag_space)
+		dlen++;
+	while (dlen < s->width && ++dlen)
+		write(1, " ", 1);
+	if (s->flag_plus || value < 0)
+		write(1, ((value < 0) ? "-" : "+"), 1);
+	else if (s->flag_space)
+		write(1, " ", 1);
+	while (dlen2++ < s->precision)
+		write(1, "0", 1);
+	if (value == LONG_MIN)
+		ft_putstr("9223372036854775808");
+	else if (!(value == 0 && s->precision == 0))
+		ft_putnbr((value < 0) ? -value : value);
+	return (dlen);
 }
 
-int		ft_for_d(int value, t_struct *s)
+int		ft_for_help_d(long int value, t_struct *s, int dlen, int i)
+{
+	int dlen2;
+
+	if (s->flag_zero == 1 && s->precision == -1)
+	{
+		if ((s->flag_plus || value < 0) && ++i)
+			write(1, ((value < 0) ? "-" : "+"), 1);
+		else if (s->flag_space == 1 && ++i)
+			write(1, " ", 1);
+		while (i < (s->width - dlen) && ++i)
+			write(1, "0", 1);
+		if (value == LONG_MIN)
+			ft_putstr("9223372036854775808");
+		else if (dlen > 0)
+			ft_putnbr((value < 0) ? -value : value);
+		i += dlen;
+		return (i);
+	}
+	return (ft_for_help_d2(value, s, dlen));
+}
+
+int		ft_for_d(long int value, t_struct *s)
 {
 	int	i;
 	int 	dlen;
 
 	i = 0;
 	dlen = ft_dlen(value);
+	if (value == 0 && s->precision == 0)
+		dlen = 0;
 	if (s->flag_minus == 1)
 	{
-		if (s->flag_plus || value < 0)
-		{
-			i++;
+		if ((s->flag_plus || value < 0) && ++i)
 			write(1, ((value < 0) ? "-" : "+"), 1);
-		}
+		else if (s->flag_space && ++i)
+			write(1, " ", 1);
 		while (s->precision-- > dlen && ++i)
 			write(1, "0", 1);
-		if (value == -2147483648)
-			ft_putstr("2147483648");
-		else
+		if (value == LONG_MIN)
+			ft_putstr("9223372036854775808");
+		else if (dlen > 0)
 			ft_putnbr((value < 0) ? -value : value);
 		i += dlen - 1;
 		while (++i < s->width)
 			write(1, " ", 1);
 	}
+	else
+		return (ft_for_help_d(value, s, dlen, i));
 	return (i);
 }
 
 int		ft_for_all_d(va_list list, t_struct *s)
 {
-	if ((s->type == 'd' || s->type == 'i') && s->size[0] == '\0')
+	if (((s->type == 'd' || s->type == 'i') && s->size[0] == '\0') ||
+	((s->type == 'd' || s->type == 'i') && ft_strcmp(s->size, "hh") == 0))
 		return (ft_for_d(va_arg(list, int), s));
-	return (0);
+	else if ((s->type == 'd' || s->type == 'i') && ft_strcmp(s->size, "h") == 0)
+		return (ft_for_d((short)va_arg(list, int), s));
+	return (ft_for_d(va_arg(list, long), s));
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+int		ft_udlen(unsigned long int value)
+{
+	int i;
+
+	i = 0;
+	if (value == 0)
+		return (1);
+	while (value)
+	{
+		i++;
+		value /= 10;
+	}
+	return (i);
+}
+
+int		ft_for_help_u(unsigned long int value, t_struct *s, int dlen)
+{
+	int tmp;
+
+	tmp = ((s->precision > dlen) ? s->precision : dlen) - 1;
+	if (s->flag_zero && s->precision == -1)
+		while (++tmp < s->width)
+			write(1, "0", 1);
+	else
+		while (++tmp < s->width)
+			write(1, " ", 1);
+	while (dlen++ < s->precision)
+		write(1, "0", 1);
+	if (value == 0 && s->precision == 0)
+		tmp--;
+	if (!(value == 0 && s->precision == 0))
+		ft_putnbr(value);
+	return (tmp);
+}
+
+int		ft_for_u(unsigned long int value, t_struct *s)
+{
+	int dlen;
+
+	dlen = ft_udlen(value);
+	if (s->flag_minus)
+	{
+		while (dlen < s->precision && ++dlen)
+			write(1, "0", 1);
+		if (value == 0 && s->precision == 0)
+			dlen--;
+		if (!(value == 0 && s->precision == 0))
+			ft_putnbr(value);
+		while (dlen < s->width && ++dlen)
+			write(1, " ", 1);
+		return (dlen);
+	}
+	return (ft_for_help_u(value, s, dlen));
+}
+
+int		ft_for_all_u(va_list list, t_struct *s)
+{
+	if ((s->type == 'u' && s->size[0] == '\0') || (s->type == 'u' && ft_strcmp(s->size, "hh") == 0))
+		return (ft_for_u(va_arg(list, unsigned int), s));
+	else if (s->type == 'u' && ft_strcmp(s->size, "h") == 0)
+		return (ft_for_u((unsigned short)va_arg(list, unsigned int), s));
+	return (ft_for_u(va_arg(list, unsigned long), s));
 }
 
 int		ft_magic(va_list list, t_struct *s)
@@ -383,7 +499,8 @@ int		ft_magic(va_list list, t_struct *s)
 		{'d', ft_for_all_d},
 		{'D', ft_for_all_d},
 		{'i', ft_for_all_d},
-		{'I', ft_for_all_d}
+		{'u', ft_for_all_u},
+		{'U', ft_for_all_u}
 		};
 
 	i = 0;
@@ -459,11 +576,15 @@ int		ft_printf(const char *format, ...)
 
 #include <locale.h>
 
+#include <limits.h>
+
 int		main(void)
 {
-	printf("mine = %d\n", ft_printf("%-6.2d", 123));
-	printf("orig = %d\n", printf("%-6.2d", 123));
-	
+	printf("mine = %d\n", ft_printf("%04u", 0));
+	printf("orig = %d\n", printf("%04u", 0));
+
+	//ft_putnbr(LONG_MAX);
+	//ft_printf("%d", LONG_MIN);
 	//setlocale(LC_ALL, "");
 	//ft_printf("%S\n", L"hello");
 

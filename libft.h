@@ -6,7 +6,7 @@
 /*   By: tkiselev <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/03/21 16:40:11 by tkiselev          #+#    #+#             */
-/*   Updated: 2018/04/23 18:41:03 by tkiselev         ###   ########.fr       */
+/*   Updated: 2018/04/27 17:25:17 by tkiselev         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,7 +63,7 @@ char				**ft_strsplit(char const *s, char c);
 char				*ft_itoa(int n);
 void				ft_putchar(int c);
 void				ft_putstr(char const *s);
-void				ft_putnbr(int n);
+void				ft_putnbr(long int n);
 void				ft_putendl(char const *s);
 void				ft_putchar_fd(char c, int fd);
 void				ft_putstr_fd(char const *s, int fd);
