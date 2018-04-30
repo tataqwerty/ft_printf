@@ -6,7 +6,7 @@
 /*   By: tkiselev <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/04/14 16:35:40 by tkiselev          #+#    #+#             */
-/*   Updated: 2018/04/27 21:20:57 by tkiselev         ###   ########.fr       */
+/*   Updated: 2018/04/30 21:55:31 by tkiselev         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -298,10 +298,10 @@ int		ft_for_all_s(va_list list, t_struct *s)
 
 char	*ft_ultoa_base(unsigned long int n, char *base)
 {
-	char			*str;
+	char				*str;
 	unsigned long int	tmp_n;
-	int			i;
-	int			base_len;
+	int					i;
+	int					base_len;
 
 	base_len = 0;
 	while (base[base_len] != '\0')
@@ -321,11 +321,134 @@ char	*ft_ultoa_base(unsigned long int n, char *base)
 	return (str);
 }
 
-//Digits
+int		ft_add_precision(char **str, int precision)
+{
+	char	*new_str;
+	int		len;
+
+	len = ft_strlen(*str);
+	if (len == 1 && (*str)[0] == '0' && precision == 0)
+	{
+		free(*str);
+		if (!(*str = (char*)malloc(sizeof(char))))
+			return (1);
+		(*str)[0] = '\0';
+	}
+	if (precision > len)
+	{
+		if (!(new_str = (char*)malloc(sizeof(char) * (precision + 1))))
+			return (1);
+		ft_memset(new_str, '0', precision);
+		new_str[precision] = '\0';
+		while (len > 0)
+			new_str[--precision] = (*str)[--len];
+		free(*str);
+		*str = new_str;
+	}
+	return (0);
+}
+
+int		ft_add_width_zero_minus(char **str, t_struct *s)
+{
+	char *new_str;
+	int len;
+	int width;
+
+	width = s->width;
+	len = ft_strlen(*str);
+	if (len < width)
+	{
+		if (!(new_str = (char*)malloc(sizeof(char) * (width + 1))))
+			return (1);
+		new_str[width] = '\0';
+		if (s->flag_zero == 1 && s->flag_minus == 0 && s->precision == -1)
+			ft_memset(new_str, '0', width);
+		else
+			ft_memset(new_str, ' ', width);
+		if (s->flag_minus)
+			ft_strncpy(new_str, *str, len);
+		else
+			ft_strncpy(new_str + (width - len), *str, len);
+		free(*str);
+		*str = new_str;
+	}
+	return (0);
+}
+
+void	ft_help_sign(char **str, t_struct *s, int sign, int *len)
+{
+	int i;
+
+	i = 0;
+	if (s->flag_minus)
+	{
+		ft_memmove((*str) + 1, *str, *len);
+		if (sign)
+			(*str)[0] = '-';
+		else if (s->flag_plus)
+			(*str)[0] = '+';
+		else
+			(*str)[0] = ' ';
+		return ;
+	}
+	if ((*str)[0] == '0')
+		i++;
+	else
+		while ((*str)[i] == ' ')
+			i++;
+	i--;
+	if (sign)
+		(*str)[i] = '-';
+	else if (s->flag_plus)
+		(*str)[i] = '+';
+}
+
+void	ft_add_sign(char **str, t_struct *s, int sign, int *len)
+{
+	if (sign || s->flag_plus || s->flag_space)
+	{
+		if (*len == ft_strlen(*str))
+		{
+			*str = ft_remalloc(*str, *len + 1);
+			ft_memmove((*str) + 1, *str, *len);
+			if (sign)
+				(*str)[0] = '-';
+			else if (s->flag_plus)
+				(*str)[0] = '+';
+			else
+				(*str)[0] = ' ';
+		}
+		else
+			ft_help_sign(str, s, sign, len);
+	}
+}
+
+int		ft_add_prefix(char **str, t_struct *s, int sign, int *len)
+{
+	if (s->type == 'd' || s->type == 'i' || s->type == 'D')
+		ft_add_sign(str, s, sign, len);
+	else if (s->type == 'x' || s->type == 'X')
+	{	
+		ft_add_sign(str, s, "0x", len);
+	}
+	return (0);
+}
 
 int		ft_for_d(char *str, t_struct *s, int sign)
 {
-	return (0);
+	int len;
+
+	if (ft_add_precision(&str, s->precision))
+		return (-1);
+	len = ft_strlen(str);
+	if (ft_add_width_zero_minus(&str, s))
+		return (-1);
+	if (ft_add_prefix(&str, s, sign, &len))
+		return (-1);
+	len = ft_strlen(str);
+	ft_putstr(str);
+	free(str);
+	return (len);
 }
 
 int		ft_for_all_d(va_list list, t_struct *s)
@@ -333,23 +456,20 @@ int		ft_for_all_d(va_list list, t_struct *s)
 	intmax_t	inum;
 	uintmax_t	unum;
 
-	if (s->type == 'd' || s->type == 'i')
+	if (s->type == 'd' || s->type == 'i' || s->type == 'D')
 	{
-		if (s->size[0] != '\0' && ft_strcmp(s->size, "h") != 0 && ft_strcmp(s->size, "hh") != 0)
+		if ((s->size[0] != '\0' && ft_strcmp(s->size, "h") != 0 && ft_strcmp(s->size, "hh") != 0) || s->type == 'D')
 			inum = va_arg(list, intmax_t);
 		else
 			inum = va_arg(list, int);
 		return (ft_for_d(ft_ultoa_base(inum > 0 ? inum : -inum, "0123456789"), s, inum < 0 ? 1 : 0));
 	}
-	else if (s->type == 'x')
+	else if (s->type == 'x' || s->type == 'X')
 	{
 		unum = va_arg(list, unsigned int);
+		if (s->type == 'X')
+			return (ft_for_d(ft_ultoa_base(unum, "0123456789ABCDEF"), s, 0));
 		return (ft_for_d(ft_ultoa_base(unum, "0123456789abcdef"), s, 0));
-	}
-	else if (s->type == 'X')
-	{
-		unum = va_arg(list, unsigned int);
-		return (ft_for_d(ft_ultoa_base(unum, "0123456789ABCDEF"), s, 0));
 	}
 	return (0);
 }
@@ -446,6 +566,10 @@ int		ft_printf(const char *format, ...)
 
 int		main(void)
 {
-	printf("%-7d", 111);
+	//setlocale(LC_ALL, "");
+	//ft_printf("%-07.5d", 111);
+	//printf("%0#7.3x", 111);
+	printf("mine = %d\n", ft_printf("%-6.4x|\n", 111));
+	printf("orig = %d\n", printf("%-6.4x|\n", 111));
 	return (0);
 }
