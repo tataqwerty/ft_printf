@@ -6,17 +6,11 @@
 /*   By: tkiselev <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/04/14 16:35:40 by tkiselev          #+#    #+#             */
-/*   Updated: 2018/04/30 21:55:31 by tkiselev         ###   ########.fr       */
+/*   Updated: 2018/05/01 17:16:07 by tkiselev         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_printf.h"
-
-#include <wchar.h>
-#include <stdint.h>
-
-#include <stdio.h>
-#include <limits.h>
 
 t_struct	*create_struct(void)
 {
@@ -375,75 +369,143 @@ int		ft_add_width_zero_minus(char **str, t_struct *s)
 	return (0);
 }
 
-void	ft_help_sign(char **str, t_struct *s, int sign, int *len)
+
+
+
+void	ft_help_smt1(char **str, t_struct *s, int len, char *smt)
 {
 	int i;
+	int	strlen;
+	int smtlen;
 
-	i = 0;
+	i = -1;
+	strlen = ft_strlen(*str);
+	smtlen = ft_strlen(smt);
 	if (s->flag_minus)
 	{
-		ft_memmove((*str) + 1, *str, *len);
-		if (sign)
-			(*str)[0] = '-';
-		else if (s->flag_plus)
-			(*str)[0] = '+';
-		else
-			(*str)[0] = ' ';
+		*str = ft_remalloc(*str, len + smtlen);
+		ft_memmove(*str + smtlen, *str, len);
+		while (smt[++i] != '\0')
+			(*str)[i] = smt[i];
 		return ;
 	}
-	if ((*str)[0] == '0')
+	*str = ft_remalloc(*str, len + smtlen);
+	ft_memmove(*str + smtlen, *str + 1, len);
+	while (smt[++i] != '\0')
+		(*str)[i] = smt[i];
+}
+
+void	ft_help_smt3(char **str, t_struct *s, int len, char *smt)
+{
+	int j;
+	int i;
+	int	strlen;
+	int smtlen;
+
+	i = 0;
+	j = -1;
+	strlen = ft_strlen(*str);
+	smtlen = ft_strlen(smt);
+	while ((*str)[i] == ' ')
 		i++;
-	else
-		while ((*str)[i] == ' ')
-			i++;
-	i--;
-	if (sign)
-		(*str)[i] = '-';
-	else if (s->flag_plus)
-		(*str)[i] = '+';
+	i -= smtlen;
+	while (smt[++j] != '\0')
+		(*str)[i++] = smt[j];
 }
 
-void	ft_add_sign(char **str, t_struct *s, int sign, int *len)
+void	ft_help_smt2(char **str, t_struct *s, int len, char *smt)
 {
-	if (sign || s->flag_plus || s->flag_space)
+	int i;
+	int	strlen;
+	int smtlen;
+
+	i = -1;
+	strlen = ft_strlen(*str);
+	smtlen = ft_strlen(smt);
+	if (s->flag_minus)
 	{
-		if (*len == ft_strlen(*str))
-		{
-			*str = ft_remalloc(*str, *len + 1);
-			ft_memmove((*str) + 1, *str, *len);
-			if (sign)
-				(*str)[0] = '-';
-			else if (s->flag_plus)
-				(*str)[0] = '+';
-			else
-				(*str)[0] = ' ';
-		}
-		else
-			ft_help_sign(str, s, sign, len);
+		ft_memmove(*str + smtlen, *str, len);
+		while (smt[++i] != '\0')
+			(*str)[i] = smt[i];
+		return ;
 	}
+	if (s->flag_zero)
+		while (smt[++i] != '\0')
+			(*str)[i] = smt[i];
+	else
+		ft_help_smt3(str, s, len, smt);
 }
 
-int		ft_add_prefix(char **str, t_struct *s, int sign, int *len)
+void	ft_add_smt(char **str, t_struct *s, int len, char *smt)
 {
-	if (s->type == 'd' || s->type == 'i' || s->type == 'D')
-		ft_add_sign(str, s, sign, len);
-	else if (s->type == 'x' || s->type == 'X')
-	{	
-		ft_add_sign(str, s, "0x", len);
+	int i;
+	int	strlen;
+	int smtlen;
+
+	i = -1;
+	strlen = ft_strlen(*str);
+	smtlen = ft_strlen(smt);
+	if (len == strlen)
+	{
+		*str = ft_remalloc(*str, len + smtlen);
+		ft_memmove(*str + smtlen, *str, len);
+		while (smt[++i] != '\0')
+			(*str)[i] = smt[i];
 	}
+	else if (smtlen + len > strlen)
+		ft_help_smt1(str, s, len, smt);
+	else
+		ft_help_smt2(str, s, len, smt);
+}
+
+int		ft_add_prefix(char **str, t_struct *s, t_for_prefix *prefix_s)
+{
+	if ((s->type == 'o' || s->type == 'O') && prefix_s->initial_len < prefix_s->len)
+		return (0);
+	if (s->type == 'd' || s->type == 'i' || s->type == 'D')
+	{
+		if (prefix_s->sign)
+			ft_add_smt(str, s, prefix_s->len, "-");
+		else if (s->flag_plus)
+			ft_add_smt(str, s, prefix_s->len, "+");
+		else
+			ft_add_smt(str, s, prefix_s->len, " ");
+	}
+	else if ((s->type == 'o' || s->type == 'O') && s->flag_reshetka)
+		ft_add_smt(str, s, prefix_s->len, "0");
+	else if (s->type == 'x' && s->flag_reshetka)
+		ft_add_smt(str, s, prefix_s->len, "0x");
+	else if (s->type == 'X' && s->flag_reshetka)
+		ft_add_smt(str, s, prefix_s->len, "0X");
+	else if (s->type == 'p')
+		ft_add_smt(str, s, prefix_s->len, "0x7ffe");
 	return (0);
+}
+
+t_for_prefix	*ft_struct_for_prefix(int sign, int len, int new_len)
+{
+	t_for_prefix *s;
+
+	if (!(s = (t_for_prefix*)malloc(sizeof(t_for_prefix))))
+		return (NULL);
+	s->sign = sign;
+	s->initial_len = len;
+	s->len = new_len;
+	return (s);
 }
 
 int		ft_for_d(char *str, t_struct *s, int sign)
 {
+	t_for_prefix *prefix_s;
 	int len;
 
+	len = ft_strlen(str);
 	if (ft_add_precision(&str, s->precision))
 		return (-1);
-	len = ft_strlen(str);
+	prefix_s = ft_struct_for_prefix(sign, len, ft_strlen(str));
 	if (ft_add_width_zero_minus(&str, s))
 		return (-1);
-	if (ft_add_prefix(&str, s, sign, &len))
+	if (ft_add_prefix(&str, s, prefix_s))
 		return (-1);
 	len = ft_strlen(str);
 	ft_putstr(str);
@@ -464,13 +526,23 @@ int		ft_for_all_d(va_list list, t_struct *s)
 			inum = va_arg(list, int);
 		return (ft_for_d(ft_ultoa_base(inum > 0 ? inum : -inum, "0123456789"), s, inum < 0 ? 1 : 0));
 	}
-	else if (s->type == 'x' || s->type == 'X')
+	else if (s->type == 'x' || s->type == 'X' || s->type == 'o' || s->type == 'O'
+	|| s->type == 'u' || s->type == 'U')
 	{
-		unum = va_arg(list, unsigned int);
-		if (s->type == 'X')
+		if (s->size[0] != '\0' && ft_strcmp(s->size, "h") != 0 && ft_strcmp(s->size, "hh") != 0)
+			unum = va_arg(list, unsigned long int);
+		else
+			unum = va_arg(list, unsigned int);
+		if (s->type == 'u' || s->type == 'u')
+			return (ft_for_d(ft_ultoa_base(unum, "0123456789"), s, 0));
+		if (s->type == 'o' || s->type == 'O')
+			return (ft_for_d(ft_ultoa_base(unum, "01234567"), s, 0));
+		else if (s->type == 'X')
 			return (ft_for_d(ft_ultoa_base(unum, "0123456789ABCDEF"), s, 0));
 		return (ft_for_d(ft_ultoa_base(unum, "0123456789abcdef"), s, 0));
 	}
+	else if (s->type == 'p')
+		return (ft_for_d(ft_ultoa_base(va_arg(list, unsigned int), "0123456789abcdef"), s, 0));
 	return (0);
 }
 
@@ -488,11 +560,14 @@ int		ft_magic(va_list list, t_struct *s)
 		{'u', ft_for_all_d},
 		{'U', ft_for_all_d},
 		{'x', ft_for_all_d},
-		{'X', ft_for_all_d}
+		{'X', ft_for_all_d},
+		{'o', ft_for_all_d},
+		{'O', ft_for_all_d},
+		{'p', ft_for_all_d}
 		};
 
 	i = 0;
-	while (i < 11)
+	while (i < 14)
 	{
 		if (s->type == arr[i].type)
 			return (arr[i].function(list, s));
@@ -560,16 +635,4 @@ int		ft_printf(const char *format, ...)
 	}
 	va_end(list);
 	return (i);
-}
-
-#include <locale.h>
-
-int		main(void)
-{
-	//setlocale(LC_ALL, "");
-	//ft_printf("%-07.5d", 111);
-	//printf("%0#7.3x", 111);
-	printf("mine = %d\n", ft_printf("%-6.4x|\n", 111));
-	printf("orig = %d\n", printf("%-6.4x|\n", 111));
-	return (0);
 }

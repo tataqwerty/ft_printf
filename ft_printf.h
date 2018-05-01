@@ -6,7 +6,7 @@
 /*   By: tkiselev <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/04/18 13:14:36 by tkiselev          #+#    #+#             */
-/*   Updated: 2018/04/23 11:23:30 by tkiselev         ###   ########.fr       */
+/*   Updated: 2018/05/01 17:15:48 by tkiselev         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,9 @@
 # define FT_PRINTF_H
 # include "libft.h"
 # include <stdarg.h>
+# include <whcar.h>
+# include <stdint.h.h>
+# include <limits.h>
 
 typedef struct	s_struct
 {
@@ -33,6 +36,13 @@ typedef struct
 	char		type;
 	int			(*function)(va_list list, t_struct *s);
 }				t_printf;
+
+typedef struct
+{
+	int	sign;
+	int initial_len;
+	int len;
+}		t_for_prefix;
 
 void	ft_spec_flags(char **format, t_struct *s);
 void	ft_spec_width(char **format, t_struct *s, va_list list);
