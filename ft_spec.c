@@ -6,7 +6,7 @@
 /*   By: tkiselev <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/04/23 11:09:51 by tkiselev          #+#    #+#             */
-/*   Updated: 2018/04/23 12:51:50 by tkiselev         ###   ########.fr       */
+/*   Updated: 2018/05/03 15:11:16 by tkiselev         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,10 +34,18 @@ void	ft_spec_flags(char **format, t_struct *s)
 
 void	ft_spec_width(char **format, t_struct *s, va_list list)
 {
+	int tmp;
+
 	if (**format == '*')
 	{
 		(*format)++;
-		s->width = va_arg(list, int);
+		tmp = va_arg(list, int);
+		if (tmp < 0)
+		{
+			s->flag_minus = 1;
+			tmp *= -1;
+		}
+		s->width = tmp;
 	}
 	else
 	{
@@ -48,13 +56,17 @@ void	ft_spec_width(char **format, t_struct *s, va_list list)
 
 void	ft_spec_precision(char **format, t_struct *s, va_list list)
 {
+	int tmp;
+
 	if (**format == '.')
 	{
 		(*format)++;
 		if (**format == '*')
 		{
 			(*format)++;
-			s->precision = va_arg(list, int);
+			tmp = va_arg(list, int);
+			if (tmp >= 0)
+				s->precision = tmp;
 		}
 		else
 		{
@@ -76,13 +88,10 @@ void	ft_spec_size(char **format, t_struct *s)
 		s->size[0] = *(*format)++;
 }
 
-void	ft_spec_type(char **format, t_struct *s)
+void	ft_spec(va_list list, char **format, t_struct *s)
 {
-	if (**format == 's' || **format == 'S' || **format == 'p' || **format == 'd'
-	|| **format == 'D' || **format == 'i' || **format == 'o'|| **format == 'O' ||
-	**format == 'u' || **format == 'U' || **format == 'x' || **format == 'X' ||
-	**format == 'c' || **format == 'C')
-		s->type = **format;
-	if (s->type != '\0')
-		(*format)++;
+	ft_spec_flags(format, s);
+	ft_spec_width(format, s, list);
+	ft_spec_precision(format, s, list);
+	ft_spec_size(format, s);
 }
