@@ -6,15 +6,15 @@
 /*   By: tkiselev <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/04/14 16:35:40 by tkiselev          #+#    #+#             */
-/*   Updated: 2018/05/03 18:05:19 by tkiselev         ###   ########.fr       */
+/*   Updated: 2018/05/05 18:28:33 by tkiselev         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_printf.h"
 
-int		ft_for_c(int c, t_struct *s)
+int			ft_for_c(int c, t_struct *s)
 {
-	int i;
+	int		i;
 
 	i = 0;
 	if (s->flag_zero && !s->flag_minus)
@@ -24,7 +24,7 @@ int		ft_for_c(int c, t_struct *s)
 		write(1, &c, 1);
 	}
 	else if (s->flag_minus)
-	{	
+	{
 		write(1, &c, 1);
 		while (++i < s->width)
 			write(1, " ", 1);
@@ -38,9 +38,9 @@ int		ft_for_c(int c, t_struct *s)
 	return (i);
 }
 
-int		ft_for_lc(wchar_t c, t_struct *s)
+int			ft_for_lc(wchar_t c, t_struct *s)
 {
-	int i;
+	int		i;
 
 	if (MB_CUR_MAX == 1 && c >= 0 && c <= 255)
 		return (ft_for_c(c, s));
@@ -67,7 +67,7 @@ int		ft_for_lc(wchar_t c, t_struct *s)
 	return (i);
 }
 
-int		ft_for_all_c(va_list list, t_struct *s)
+int			ft_for_all_c(va_list list, t_struct *s)
 {
 	if ((ft_strcmp(s->size, "l") == 0 && s->type == 'c') ||
 	s->type == 'C')
@@ -75,7 +75,7 @@ int		ft_for_all_c(va_list list, t_struct *s)
 	return (ft_for_c(va_arg(list, int), s));
 }
 
-int		ft_for_all_s(va_list list, t_struct *s)
+int			ft_for_all_s(va_list list, t_struct *s)
 {
 	wchar_t	*str1;
 	char	*str2;

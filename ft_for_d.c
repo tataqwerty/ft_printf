@@ -12,7 +12,7 @@
 
 #include "ft_printf.h"
 
-char	*ft_ultoa_base(unsigned long int n, char *base)
+char					*ft_ultoa_base(unsigned long int n, char *base)
 {
 	char				*str;
 	unsigned long int	tmp_n;
@@ -37,10 +37,10 @@ char	*ft_ultoa_base(unsigned long int n, char *base)
 	return (str);
 }
 
-int		ft_for_all_d(va_list list, t_struct *s)
+int						ft_for_all_d(va_list list, t_struct *s)
 {
-	uintmax_t	unum;
-	intmax_t	inum;
+	uintmax_t			unum;
+	intmax_t			inum;
 
 	if (s->type == 'd' || s->type == 'i' || s->type == 'D')
 	{
@@ -60,11 +60,11 @@ int		ft_for_all_d(va_list list, t_struct *s)
 	return (0);
 }
 
-int		ft_for_d(char *str, t_struct *s, int sign)
+int						ft_for_d(char *str, t_struct *s, int sign)
 {
-	char	*tmp2;
-	char	*tmp;
-	int		len;
+	char				*tmp2;
+	char				*tmp;
+	int					len;
 
 	tmp = str;
 	if (ft_precision(&str, s->precision) == -1)
@@ -75,7 +75,8 @@ int		ft_for_d(char *str, t_struct *s, int sign)
 		return (-1);
 	if (s->type == 'x' || s->type == 'X' || s->type == 'o' || s->type == 'O')
 	{
-		if ((s->type == 'x' || s->type == 'X') && tmp[0] != '\0' && tmp[0] != '0')
+		if ((s->type == 'x' || s->type == 'X') && tmp[0] != '\0' &&
+		tmp[0] != '0')
 			ft_prefix(&str, s, len, sign);
 		else if ((s->type == 'o' || s->type == 'O') && tmp2[0] != '0')
 			ft_prefix(&str, s, len, sign);
@@ -88,7 +89,7 @@ int		ft_for_d(char *str, t_struct *s, int sign)
 	return (len);
 }
 
-uintmax_t	ft_extract_uintmax(va_list list, t_struct *s)
+uintmax_t				ft_extract_uintmax(va_list list, t_struct *s)
 {
 	if (s->type != 'p' && s->type != 'U' && s->type != 'O')
 	{
@@ -102,7 +103,7 @@ uintmax_t	ft_extract_uintmax(va_list list, t_struct *s)
 	return (va_arg(list, uintmax_t));
 }
 
-intmax_t	ft_extract_intmax(va_list list, t_struct *s)
+intmax_t				ft_extract_intmax(va_list list, t_struct *s)
 {
 	if ((s->size[0] != '\0' && ft_strcmp(s->size, "h") != 0
 	&& ft_strcmp(s->size, "hh") != 0) || s->type == 'D')

@@ -12,7 +12,7 @@
 
 #include "ft_printf.h"
 
-int		ft_precision(char **str, int precision)
+int			ft_precision(char **str, int precision)
 {
 	char	*tmp_s;
 	int		len;
@@ -36,7 +36,7 @@ int		ft_precision(char **str, int precision)
 	return (0);
 }
 
-int		ft_width(char **str, t_struct *s)
+int			ft_width(char **str, t_struct *s)
 {
 	char	*tmp_s;
 	int		len;
@@ -60,15 +60,16 @@ int		ft_width(char **str, t_struct *s)
 	return (0);
 }
 
-void	ft_prefix_help(char **str, t_struct *s, int initial_len, char *prefix)
+void		ft_prefix_help(char **str, t_struct *s, int initial_len,
+			char *prefix)
 {
-	int i;
-    int strlen;
-    int prefix_len;
+	int		i;
+	int		strlen;
+	int		prefix_len;
 
 	i = 0;
-    strlen = ft_strlen(*str);
-    prefix_len = ft_strlen(prefix);
+	strlen = ft_strlen(*str);
+	prefix_len = ft_strlen(prefix);
 	if (s->flag_minus)
 	{
 		ft_memmove(*str + prefix_len, *str, initial_len);
@@ -78,17 +79,19 @@ void	ft_prefix_help(char **str, t_struct *s, int initial_len, char *prefix)
 		ft_strncpy(*str, prefix, prefix_len);
 	else
 	{
-		while ((*str)[i] && (*str)[i + prefix_len] && (*str)[i + prefix_len] == ' ')
+		while ((*str)[i] && (*str)[i + prefix_len] &&
+		(*str)[i + prefix_len] == ' ')
 			i++;
 		ft_strncpy(*str + i, prefix, prefix_len);
 	}
 }
 
-void	ft_add_prefix(char **str, t_struct *s, int initial_len, char *prefix)
+void		ft_add_prefix(char **str, t_struct *s, int initial_len,
+			char *prefix)
 {
-	char *new_str;
-	int strlen;
-	int prefix_len;
+	char	*new_str;
+	int		strlen;
+	int		prefix_len;
 
 	strlen = ft_strlen(*str);
 	prefix_len = ft_strlen(prefix);
@@ -107,7 +110,7 @@ void	ft_add_prefix(char **str, t_struct *s, int initial_len, char *prefix)
 		ft_prefix_help(str, s, initial_len, prefix);
 }
 
-void	ft_prefix(char **str, t_struct *s, int len, int sign)
+void		ft_prefix(char **str, t_struct *s, int len, int sign)
 {
 	if (s->type == 'd' || s->type == 'i' || s->type == 'D')
 	{

@@ -12,16 +12,16 @@
 
 #include "ft_printf.h"
 
-int		ft_magic(va_list list, t_struct *s)
+int					ft_magic(va_list list, t_struct *s)
 {
-	int i;
-	static t_printf arr[] = {{'c', ft_for_all_c},{'C', ft_for_all_c},
-		{'s', ft_for_all_s},{'S', ft_for_all_s},{'d', ft_for_all_d},
-		{'D', ft_for_all_d},{'i', ft_for_all_d},{'u', ft_for_all_d},
-		{'U', ft_for_all_d},{'x', ft_for_all_d},{'X', ft_for_all_d},
-		{'o', ft_for_all_d},{'O', ft_for_all_d},{'p', ft_for_all_d}
+	int				i;
+	static t_printf	arr[] = {{'c', ft_for_all_c}, {'C', ft_for_all_c},
+		{'s', ft_for_all_s}, {'S', ft_for_all_s}, {'d', ft_for_all_d},
+		{'D', ft_for_all_d}, {'i', ft_for_all_d}, {'u', ft_for_all_d},
+		{'U', ft_for_all_d}, {'x', ft_for_all_d}, {'X', ft_for_all_d},
+		{'o', ft_for_all_d}, {'O', ft_for_all_d}, {'p', ft_for_all_d}
 		};
-	
+
 	i = -1;
 	while (++i < 14)
 	{
@@ -31,10 +31,10 @@ int		ft_magic(va_list list, t_struct *s)
 	return (ft_for_c(s->type, s));
 }
 
-void	ft_parse_spec(va_list list, char **format, int *i)
+void				ft_parse_spec(va_list list, char **format, int *i)
 {
-	t_struct	*s;
-	int			tmp;
+	t_struct		*s;
+	int				tmp;
 
 	(*format)++;
 	tmp = 0;
@@ -58,7 +58,7 @@ void	ft_parse_spec(va_list list, char **format, int *i)
 	free(s);
 }
 
-int		ft_printf(const char *format, ...)
+int					ft_printf(const char *format, ...)
 {
 	va_list			list;
 	int				i;

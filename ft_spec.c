@@ -34,7 +34,7 @@ void	ft_spec_flags(char **format, t_struct *s)
 
 void	ft_spec_width(char **format, t_struct *s, va_list list)
 {
-	int tmp;
+	int	tmp;
 
 	if (**format == '*')
 	{
@@ -56,7 +56,7 @@ void	ft_spec_width(char **format, t_struct *s, va_list list)
 
 void	ft_spec_precision(char **format, t_struct *s, va_list list)
 {
-	int tmp;
+	int	tmp;
 
 	if (**format == '.')
 	{
@@ -72,19 +72,21 @@ void	ft_spec_precision(char **format, t_struct *s, va_list list)
 		{
 			s->precision = 0;
 			while (**format >= '0' && **format <= '9')
-				s->precision = s->precision * 10 + *(*format)++ - 48 ;
+				s->precision = s->precision * 10 + *(*format)++ - 48;
 		}
 	}
 }
 
 void	ft_spec_size(char **format, t_struct *s)
 {
-	if ((**format == 'h' && *(*format + 1) == 'h') || (**format == 'l' && *(*format + 1) == 'l'))
+	if ((**format == 'h' && *(*format + 1) == 'h') || (**format == 'l'
+	&& *(*format + 1) == 'l'))
 	{
 		s->size[0] = *(*format)++;
 		s->size[1] = *(*format)++;
 	}
-	else if (**format == 'h' || **format == 'l' || **format == 'z' || **format == 'j')
+	else if (**format == 'h' || **format == 'l' || **format == 'z'
+	|| **format == 'j')
 		s->size[0] = *(*format)++;
 }
 
