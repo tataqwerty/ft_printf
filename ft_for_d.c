@@ -63,10 +63,10 @@ int						ft_for_all_d(va_list list, t_struct *s)
 int						ft_for_d(char *str, t_struct *s, int sign)
 {
 	char				*tmp2;
-	char				*tmp;
+	char				*t;
 	int					len;
 
-	tmp = str;
+	t = ft_strdup(str);
 	if (ft_precision(&str, s->precision) == -1)
 		return (-1);
 	tmp2 = str;
@@ -75,8 +75,7 @@ int						ft_for_d(char *str, t_struct *s, int sign)
 		return (-1);
 	if (s->type == 'x' || s->type == 'X' || s->type == 'o' || s->type == 'O')
 	{
-		if ((s->type == 'x' || s->type == 'X') && tmp[0] != '\0' &&
-		tmp[0] != '0')
+		if ((s->type == 'x' || s->type == 'X') && t[0] != '\0' && t[0] != '0')
 			ft_prefix(&str, s, len, sign);
 		else if ((s->type == 'o' || s->type == 'O') && tmp2[0] != '0')
 			ft_prefix(&str, s, len, sign);
@@ -86,6 +85,7 @@ int						ft_for_d(char *str, t_struct *s, int sign)
 	len = ft_strlen(str);
 	write(1, str, len);
 	free(str);
+	free(t);
 	return (len);
 }
 

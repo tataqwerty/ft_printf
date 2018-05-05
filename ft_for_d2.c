@@ -75,7 +75,7 @@ void		ft_prefix_help(char **str, t_struct *s, int initial_len,
 		ft_memmove(*str + prefix_len, *str, initial_len);
 		ft_strncpy(*str, prefix, prefix_len);
 	}
-	else if (s->flag_zero)
+	else if (s->flag_zero && s->precision == -1)
 		ft_strncpy(*str, prefix, prefix_len);
 	else
 	{
@@ -102,7 +102,7 @@ void		ft_add_prefix(char **str, t_struct *s, int initial_len,
 		if (s->flag_minus || initial_len == strlen)
 			ft_strncpy(new_str + prefix_len, *str, initial_len);
 		else
-			ft_strncpy(new_str + prefix_len, prefix + 1, prefix_len);
+			ft_strncpy(new_str + prefix_len, *str + 1, initial_len);
 		free(*str);
 		*str = new_str;
 	}
