@@ -6,7 +6,7 @@
 /*   By: tkiselev <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/04/18 13:14:36 by tkiselev          #+#    #+#             */
-/*   Updated: 2018/05/05 18:49:32 by tkiselev         ###   ########.fr       */
+/*   Updated: 2018/05/07 14:25:28 by tkiselev         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,4 +66,5 @@ void			ft_add_prefix(char **str, t_struct *s, int initial_len,
 				char *prefix);
 void			ft_prefix(char **str, t_struct *s, int len, int sign);
 t_struct		*create_struct(void);
+void			ft_help_width(t_struct *s, va_list list, char **format);
 #endif

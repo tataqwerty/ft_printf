@@ -6,11 +6,19 @@
 /*   By: tkiselev <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/04/14 16:35:40 by tkiselev          #+#    #+#             */
-/*   Updated: 2018/05/03 18:05:19 by tkiselev         ###   ########.fr       */
+/*   Updated: 2018/05/07 14:52:50 by tkiselev         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_printf.h"
+
+void				ft_spec(va_list list, char **format, t_struct *s)
+{
+	ft_spec_flags(format, s);
+	ft_spec_width(format, s, list);
+	ft_spec_precision(format, s, list);
+	ft_spec_size(format, s);
+}
 
 int					ft_magic(va_list list, t_struct *s)
 {

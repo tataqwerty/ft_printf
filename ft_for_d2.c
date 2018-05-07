@@ -6,7 +6,7 @@
 /*   By: tkiselev <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/04/14 16:35:40 by tkiselev          #+#    #+#             */
-/*   Updated: 2018/05/03 18:05:19 by tkiselev         ###   ########.fr       */
+/*   Updated: 2018/05/07 13:48:22 by tkiselev         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,11 +64,9 @@ void		ft_prefix_help(char **str, t_struct *s, int initial_len,
 			char *prefix)
 {
 	int		i;
-	int		strlen;
 	int		prefix_len;
 
 	i = 0;
-	strlen = ft_strlen(*str);
 	prefix_len = ft_strlen(prefix);
 	if (s->flag_minus)
 	{
