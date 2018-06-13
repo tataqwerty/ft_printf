@@ -12,26 +12,6 @@
 
 #include "libft.h"
 
-static	char		*ft_realloc(char *ptr, int size)
-{
-	int				i;
-	char			*new_ptr;
-
-	i = 0;
-	if (!(new_ptr = ft_strnew(size)))
-		return (0);
-	if (ptr)
-	{
-		while (ptr[i] != '\0')
-		{
-			new_ptr[i] = ptr[i];
-			i++;
-		}
-		free(ptr);
-	}
-	return (new_ptr);
-}
-
 static	int			ft_put_n(t_gnl *list, char **line, int *size)
 {
 	int				flag;
@@ -42,7 +22,7 @@ static	int			ft_put_n(t_gnl *list, char **line, int *size)
 	while (list->buffer[n] != '\0' && list->buffer[n] != '\n')
 		n++;
 	(*size) += n;
-	*line = ft_realloc(*line, *size);
+	*line = ft_remalloc(*line, *size);
 	ft_memccpy(*line + ft_strlen(*line), list->buffer, '\n', n);
 	if (list->buffer[n] == '\n')
 	{

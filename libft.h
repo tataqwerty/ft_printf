@@ -16,6 +16,9 @@
 # include <stdlib.h>
 # include <unistd.h>
 # include <string.h>
+# include <stdarg.h>
+# include <wchar.h>
+# include <stdint.h>
 
 void				*ft_memset(void *b, int c, size_t len);
 void				ft_bzero(void *s, size_t n);
@@ -89,6 +92,7 @@ void				ft_lstadd(t_list **alst, t_list *new);
 void				ft_lstiter(t_list *lst, void (*f)(t_list *elem));
 t_list				*ft_lstmap(t_list *lst, t_list *(*f)(t_list *elem));
 char				*ft_itoa_base(int value, int base);
+void				ft_list_pushback(t_list **head, char *line);
 
 typedef struct		s_btree
 {
@@ -104,8 +108,6 @@ void				ft_btree_apply_infix_reverse(t_btree *root,
 					void (*f)(void *));
 void				ft_btree_apply_postfix(t_btree *root, void (*f)(void *));
 
-# define BUFF_SIZE 1
-
 typedef struct		s_gnl
 {
 	char			*buffer;
@@ -113,5 +115,58 @@ typedef struct		s_gnl
 	struct s_gnl	*next;
 }					t_gnl;
 
+# define BUFF_SIZE 500
+
 int					get_next_line(const int fd, char **line);
+
+typedef struct	s_struct
+{
+	int			width;
+	char		type;
+	char		size[3];
+	int			precision;
+	int			flag_zero;
+	int			flag_reshetka;
+	int			flag_minus;
+	int			flag_plus;
+	int			flag_space;
+}				t_struct;
+
+typedef struct
+{
+	char		type;
+	int			(*function)(va_list list, t_struct *s);
+}				t_printf;
+
+int				ft_printf(const char *format, ...);
+void			ft_spec_flags(char **format, t_struct *s);
+void			ft_spec_width(char **format, t_struct *s, va_list list);
+void			ft_spec_precision(char **format, t_struct *s, va_list list);
+void			ft_spec_size(char **format, t_struct *s);
+void			ft_parse_spec(va_list list, char **format, int *i);
+void			ft_spec(va_list list, char **format, t_struct *s);
+int				ft_has_unicode(wchar_t *str, int bytes);
+int				ft_count_bytes(wchar_t *str, int bytes);
+void			ft_s_helper(wchar_t *str, int bytes);
+int				ft_for_ls(wchar_t *str, t_struct *s);
+int				ft_for_s(char *str, t_struct *s);
+int				ft_for_all_d(va_list list, t_struct *s);
+int				ft_for_all_s(va_list list, t_struct *s);
+int				ft_for_all_c(va_list list, t_struct *s);
+int				ft_for_c(int c, t_struct *s);
+int				ft_for_lc(wchar_t c, t_struct *s);
+char			*ft_ultoa_base(unsigned long int n, char *base);
+int				ft_for_all_d(va_list list, t_struct *s);
+int				ft_for_d(char *str, t_struct *s, int sign);
+uintmax_t		ft_extract_uintmax(va_list list, t_struct *s);
+intmax_t		ft_extract_intmax(va_list list, t_struct *s);
+int				ft_precision(char **str, int precision);
+int				ft_width(char **str, t_struct *s);
+void			ft_prefix_help(char **str, t_struct *s, int initial_len,
+				char *prefix);
+void			ft_add_prefix(char **str, t_struct *s, int initial_len,
+				char *prefix);
+void			ft_prefix(char **str, t_struct *s, int len, int sign);
+t_struct		*create_struct(void);
+void			ft_help_width(t_struct *s, va_list list, char **format);
 #endif
